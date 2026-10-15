@@ -27,6 +27,11 @@ local niku_escape = hl.bind(
   hl.dsp.exec_cmd([[bash "$HOME/.config/omarchy/plugins/cibo.niku-ai/toggle.sh" close]]),
   { description = "Hide Niku AI" }
 )
+local niku_click = hl.bind(
+  "mouse:272",
+  hl.dsp.exec_cmd([[bash "$HOME/.config/omarchy/plugins/cibo.niku-ai/toggle.sh" close-if-pointer-outside]]),
+  { non_consuming = true }
+)
 
 local niku_was_focused = false
 
@@ -38,6 +43,7 @@ local function update_niku_focus(window)
     or class:find("chatgpt.com", 1, true) ~= nil
     or initial_class:find("chatgpt.com", 1, true) ~= nil
   niku_escape:set_enabled(is_niku)
+  niku_click:set_enabled(is_niku)
   local should_hide = niku_was_focused and not is_niku
   niku_was_focused = is_niku
   if should_hide then

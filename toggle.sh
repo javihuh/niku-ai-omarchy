@@ -31,6 +31,27 @@ hide_panel() {
   fi
 }
 
+pointer_outside_panel() {
+  local client cursor
+  client=$(hyprctl clients -j | jq -c '
+    [.[] | select(
+      ((.class // "") | ascii_downcase | contains("nikuai")) or
+      ((.initialClass // "") | ascii_downcase | contains("nikuai")) or
+      ((.class // "") | ascii_downcase | contains("chatgpt.com")) or
+      ((.initialClass // "") | ascii_downcase | contains("chatgpt.com"))
+    )] | first // empty
+  ')
+  [[ -n $client ]] || return 1
+
+  cursor=$(hyprctl cursorpos -j)
+  jq -e -n --argjson client "$client" --argjson cursor "$cursor" '
+    $cursor.x < $client.at[0] or
+    $cursor.y < $client.at[1] or
+    $cursor.x >= ($client.at[0] + $client.size[0]) or
+    $cursor.y >= ($client.at[1] + $client.size[1])
+  ' >/dev/null
+}
+
 if [[ $action == "status" ]]; then
   if workspace_visible; then
     printf 'visible\n'
@@ -51,6 +72,13 @@ fi
 
 if [[ $action == "close" ]]; then
   hide_panel
+  exit 0
+fi
+
+if [[ $action == "close-if-pointer-outside" ]]; then
+  if workspace_visible && pointer_outside_panel; then
+    hide_panel
+  fi
   exit 0
 fi
 
