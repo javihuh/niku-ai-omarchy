@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "id": "cibo.niku-ai",
+  "name": "Niku AI",
+  "version": "1.0.0",
+  "author": "javihuh",
+  "license": "MIT",
+  "description": "A persistent ChatGPT panel for the Omarchy bar.",
+  "kinds": [
+    "bar-widget"
+  ],
+  "activation": "on-demand",
+  "entryPoints": {
+    "barWidget": "BarWidget.qml"
+  },
+  "barWidget": {
+    "displayName": "Niku AI",
+    "description": "Open ChatGPT in a persistent panel attached to the bar.",
+    "category": "AI",
+    "allowMultiple": false,
+    "defaultSection": "right",
+    "defaults": {
+      "icon": "\uec81",
+      "shortcut": "Super+G"
+    },
+    "schema": [
+      {
+        "key": "shortcut",
+        "type": "string",
+        "label": "Shortcut label",
+        "defaultValue": "Super+G"
+      },
+      {
+        "key": "icon",
+        "type": "string",
+        "label": "Bar icon",
+        "defaultValue": "\uec81"
+      }
+    ]
+  }
+}
