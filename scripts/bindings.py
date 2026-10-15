@@ -28,7 +28,9 @@ local niku_escape = hl.bind(
   { description = "Hide Niku AI" }
 )
 
-local function update_niku_escape(window)
+local niku_was_focused = false
+
+local function update_niku_focus(window)
   local class = window and string.lower(window.class or "") or ""
   local initial_class = window and string.lower(window.initial_class or "") or ""
   local is_niku = class:find("nikuai", 1, true) ~= nil
@@ -36,10 +38,15 @@ local function update_niku_escape(window)
     or class:find("chatgpt.com", 1, true) ~= nil
     or initial_class:find("chatgpt.com", 1, true) ~= nil
   niku_escape:set_enabled(is_niku)
+  local should_hide = niku_was_focused and not is_niku
+  niku_was_focused = is_niku
+  if should_hide then
+    hl.exec_cmd([[bash "$HOME/.config/omarchy/plugins/cibo.niku-ai/toggle.sh" close]])
+  end
 end
 
-update_niku_escape(hl.get_active_window())
-hl.on("window.active", update_niku_escape)
+update_niku_focus(hl.get_active_window())
+hl.on("window.active", update_niku_focus)
 -- END Niku AI managed bindings
 '''
 

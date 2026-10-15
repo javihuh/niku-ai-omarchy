@@ -12,6 +12,7 @@ opens, and stays out of the way when hidden.
 - Left-click toggles the panel; right-click quits it completely.
 - Optional `Super+G` shortcut from anywhere.
 - Optional `Esc` shortcut that hides the panel only while ChatGPT has focus.
+- Hides automatically when focus moves to another window.
 - Uses ChatGPT's native appearance and does not inject CSS.
 
 ## Requirements
@@ -47,6 +48,7 @@ of `~/.config/hypr/bindings.lua`, and reloads Hyprland.
 | Right-click | Quit Niku AI completely |
 | `Super+G` | Show or hide Niku AI when shortcuts are installed |
 | `Esc` | Hide Niku AI while its window has focus |
+| Click another window | Hide Niku AI automatically |
 
 Hiding the panel keeps Brave running so the page and login remain available.
 Quitting closes the isolated Brave process. The profile is stored locally at
