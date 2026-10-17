@@ -41,6 +41,18 @@ python3 ~/.config/omarchy/plugins/cibo.niku-ai/scripts/bindings.py install
 the existing binding before making that change, creates a timestamped backup
 of `~/.config/hypr/bindings.lua`, and reloads Hyprland.
 
+## Update
+
+Update the plugin and refresh its managed Hyprland bindings with:
+
+```bash
+omarchy plugin update cibo.niku-ai --yes
+python3 ~/.config/omarchy/plugins/cibo.niku-ai/scripts/bindings.py install
+```
+
+The second command is safe to run after every update. It only replaces Niku
+AI's marked binding block and leaves the rest of `bindings.lua` unchanged.
+
 ## Usage
 
 | Action | Result |
@@ -63,12 +75,6 @@ omarchy-shell cibo.niku-ai open
 omarchy-shell cibo.niku-ai close
 omarchy-shell cibo.niku-ai toggle
 omarchy-shell cibo.niku-ai quit
-```
-
-Update an installed copy:
-
-```bash
-omarchy plugin update cibo.niku-ai
 ```
 
 ## Remove
