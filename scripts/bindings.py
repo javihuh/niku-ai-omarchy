@@ -33,8 +33,6 @@ local niku_click = hl.bind(
   { non_consuming = true }
 )
 
-local niku_was_focused = false
-
 local function update_niku_focus(window)
   local class = window and string.lower(window.class or "") or ""
   local initial_class = window and string.lower(window.initial_class or "") or ""
@@ -43,16 +41,23 @@ local function update_niku_focus(window)
     or class:find("chatgpt.com", 1, true) ~= nil
     or initial_class:find("chatgpt.com", 1, true) ~= nil
   niku_escape:set_enabled(is_niku)
-  niku_click:set_enabled(is_niku)
-  local should_hide = niku_was_focused and not is_niku
-  niku_was_focused = is_niku
-  if should_hide then
-    hl.exec_cmd([[bash "$HOME/.config/omarchy/plugins/cibo.niku-ai/toggle.sh" close]])
-  end
+end
+
+local function update_niku_visibility()
+  local special = hl.get_active_special_workspace()
+  niku_click:set_enabled(special ~= nil and special.name == "special:niku-ai")
 end
 
 update_niku_focus(hl.get_active_window())
+update_niku_visibility()
 hl.on("window.active", update_niku_focus)
+hl.on("workspace.special_active", update_niku_visibility)
+hl.on("workspace.active", function()
+  hl.exec_cmd([[bash "$HOME/.config/omarchy/plugins/cibo.niku-ai/toggle.sh" restore]])
+end)
+hl.on("window.open", function()
+  hl.exec_cmd([[bash "$HOME/.config/omarchy/plugins/cibo.niku-ai/toggle.sh" evict]])
+end)
 -- END Niku AI managed bindings
 '''
 

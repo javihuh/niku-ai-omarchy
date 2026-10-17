@@ -8,6 +8,7 @@ workspace_name="niku-ai"
 window_class="NikuAI"
 url="https://chatgpt.com/"
 profile_dir="${XDG_DATA_HOME:-$HOME/.local/share}/niku-ai/brave-profile"
+visible_state="${XDG_RUNTIME_DIR:-/tmp}/niku-ai-visible"
 
 client_address() {
   hyprctl clients -j | jq -r '
@@ -25,8 +26,33 @@ workspace_visible() {
     'any(.[]; .specialWorkspace.name == $workspace)' >/dev/null
 }
 
+evict_foreign_windows() {
+  local clients monitors address monitor_id target selector
+  clients=$(hyprctl clients -j)
+  monitors=$(hyprctl monitors -j)
+
+  while IFS=$'\t' read -r address monitor_id; do
+    [[ -n $address ]] || continue
+    target=$(jq -r --argjson monitor_id "$monitor_id" \
+      '.[] | select(.id == $monitor_id) | .activeWorkspace.name' <<<"$monitors")
+    [[ -n $target && $target != "null" ]] || continue
+    selector="address:$address"
+    hyprctl dispatch "hl.dsp.window.move({ workspace = \"$target\", follow = false, window = \"$selector\" })" >/dev/null
+  done < <(jq -r --arg workspace "$workspace" '
+    .[] | select(
+      .workspace.name == $workspace and
+      (((.class // "") | ascii_downcase | contains("nikuai")) | not) and
+      (((.initialClass // "") | ascii_downcase | contains("nikuai")) | not) and
+      (((.class // "") | ascii_downcase | contains("chatgpt.com")) | not) and
+      (((.initialClass // "") | ascii_downcase | contains("chatgpt.com")) | not)
+    ) | [.address, .monitor] | @tsv
+  ' <<<"$clients")
+}
+
 hide_panel() {
+  rm -f "$visible_state"
   if workspace_visible; then
+    evict_foreign_windows
     hyprctl dispatch "hl.dsp.workspace.toggle_special(\"$workspace_name\")" >/dev/null
   fi
 }
@@ -62,6 +88,7 @@ if [[ $action == "status" ]]; then
 fi
 
 if [[ $action == "quit" ]]; then
+  rm -f "$visible_state"
   address=$(client_address)
   if [[ -n $address ]]; then
     selector="address:$address"
@@ -82,12 +109,25 @@ if [[ $action == "close-if-pointer-outside" ]]; then
   exit 0
 fi
 
+if [[ $action == "evict" ]]; then
+  evict_foreign_windows
+  exit 0
+fi
+
+if [[ $action == "restore" ]]; then
+  if [[ -f $visible_state ]] && ! workspace_visible && [[ -n $(client_address) ]]; then
+    hyprctl dispatch "hl.dsp.workspace.toggle_special(\"$workspace_name\")" >/dev/null
+  fi
+  exit 0
+fi
+
 if [[ $action == "toggle" ]] && workspace_visible; then
   hide_panel
   exit 0
 fi
 
 if [[ $action == "open" ]] && workspace_visible; then
+  : >"$visible_state"
   exit 0
 fi
 
@@ -139,3 +179,4 @@ sleep 0.3
 if ! workspace_visible; then
   hyprctl dispatch "hl.dsp.workspace.toggle_special(\"$workspace_name\")" >/dev/null
 fi
+: >"$visible_state"
